@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Run MongoDB
+      containers.podman.podman_container:
+        name: mongodb
+        image: docker.io/mongo
+        state: started
+        ports:
+          - "27017:27017"
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: example

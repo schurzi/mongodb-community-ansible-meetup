@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  tasks:
+    - name: set maintenance in monitoring
+      uri:
+      # ...
+      # call to monitoring system to disable alerts
+
+- hosts: localbalancer
+  tasks:
+    - name: activate maintenance site
+      copy:
+      # copy maintenance config
+
+- hosts: webserver
+  tasks:
+    - name: stop webserver
+      systemd:
+        name: nginx
+        state: stopped
+
+    - name: update all packages
+      command: "yum update -y"
+
+    - name: reboot
+      reboot:
+        wait_for_ssh: true    
+
+    - name: start webserver
+      systemd:
+        name: nginx
+        state: started
+
+- hosts: localbalancer
+  tasks:
+    - name: deactivate maintenance site
+      copy:
+      # copy production config
+
+- hosts: localhost
+  tasks:
+    - name: set maintenance in monitoring
+      uri:
+      # ...
+      # call to monitoring system to enable alerts

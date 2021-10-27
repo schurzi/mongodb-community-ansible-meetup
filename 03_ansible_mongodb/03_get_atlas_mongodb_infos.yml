@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  vars:
+    mongo_user: user
+    mongo_password: SGzWm1fh3dxL7r7y
+  tasks:
+    - name: Gather information about databases and their total size
+      community.mongodb.mongodb_info:
+        login_host: free-cluster-shard-00-01.hqzn3.mongodb.net
+        login_user: "{{ mongo_user }}"
+        login_password: "{{ mongo_password }}"
+        filter: databases, total_size

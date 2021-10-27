@@ -1,0 +1,89 @@
+---
+- hosts: localhost
+  gather_facts: false
+  collections:
+    - t_systems_mms.mongodb_atlas
+  vars:
+    atlas_api_project: "5f6c3a568c34e42093e2215b"
+    atlas_api_user: "mrqluzcz"
+    atlas_api_password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      30356166396264336332323232343939616139326564626261363633363634383939653039356332
+      6134636338666465396632373831336438376132303531390a633134313836373966626631353766
+      66633037646133373736396362366430333064363538653862343039613961616632343439303764
+      6431383935346435330a353861616363356662373963626636353133663430386365393430346231
+      30363564363231356133373663646335376136396161353064636639663662643161323362663737
+      3664653734616630366435306234666536326236623734323236
+  tasks:
+    - name: Create demo cluster
+      atlas_cluster:
+        apiUsername: "{{ atlas_api_user }}"
+        apiPassword: "{{ atlas_api_password }}" 
+        groupId: "{{ atlas_api_project }}"
+        name: "demo-cluster"
+        mongoDBMajorVersion: "4.4"
+        clusterType: "REPLICASET"
+        providerSettings:
+          providerName: "GCP"
+          regionName: "WESTERN_EUROPE"
+          instanceSizeName: "M10"
+        pitEnabled: False
+        providerBackupEnabled: False
+
+    - name: create demo user
+      atlas_user:
+        apiUsername: "{{ atlas_api_user }}"
+        apiPassword: "{{ atlas_api_password }}" 
+        groupId: "{{ atlas_api_project }}"
+        username: demo
+        password: demopass
+        roles:
+          - databaseName: test
+            roleName: read
+
+    - name: create whitelist
+      atlas_whitelist:
+        apiUsername: "{{ atlas_api_user }}"
+        apiPassword: "{{ atlas_api_password }}" 
+        groupId: "{{ atlas_api_project }}"
+        cidrBlock: "172.0.0.0/24"
+
+    - name: Pause to show results
+      pause:
+        minutes: 30
+    
+    - name: delete demo user
+      atlas_user:
+        apiUsername: "{{ atlas_api_user }}"
+        apiPassword: "{{ atlas_api_password }}" 
+        groupId: "{{ atlas_api_project }}"
+        state: absent
+        username: demo
+        password: demopass
+        roles:
+          - databaseName: test
+            roleName: read
+
+    - name: delete whitelist
+      atlas_whitelist:
+        apiUsername: "{{ atlas_api_user }}"
+        apiPassword: "{{ atlas_api_password }}" 
+        groupId: "{{ atlas_api_project }}"
+        cidrBlock: "172.0.0.0/24"
+        state: absent
+
+    - name: delete cluster
+      atlas_cluster:
+        apiUsername: "{{ atlas_api_user }}"
+        apiPassword: "{{ atlas_api_password }}" 
+        groupId: "{{ atlas_api_project }}"
+        state: absent
+        name: "demo-cluster"
+        mongoDBMajorVersion: "4.4"
+        clusterType: "REPLICASET"
+        providerSettings:
+          providerName: "GCP"
+          regionName: "WESTERN_EUROPE"
+          instanceSizeName: "M10"
+        pitEnabled: False
+        providerBackupEnabled: False

@@ -1,0 +1,51 @@
+- hosts: localhost
+  tasks:
+    - name: "Run Webserver container web0{{ item }}"
+      containers.podman.podman_container:
+        name: "web0{{ item }}"
+        image: docker.io/rndmh3ro/docker-centos8-ansible
+        ports:
+          - "202{{ item }}:22"
+        command: /lib/systemd/systemd
+        volume:
+          - /home/mch/ansible-mongo:/ansible
+          - /sys/fs/cgroup:/sys/fs/cgroup:ro
+        privileged: true
+        state: started
+      with_items:
+        - "1"
+        - "2"
+
+    - name: install openssh into container
+      command: "docker exec web0{{ item }} yum install -y openssh-server"
+      with_items:
+        - "1"
+        - "2"
+
+    - name: start openssh server in container
+      command: "docker exec web0{{ item }} systemctl start sshd"      
+      with_items:
+        - "1"
+        - "2"
+
+    - name: read ssh pubkey
+      set_fact:
+        pubkey: "{{lookup('file', '/home/mch/.ssh/id_rsa.pub') }}"
+
+    - name: create .ssh folder
+      command: "docker exec web0{{ item }} mkdir /root/.ssh"      
+      with_items:
+        - "1"
+        - "2"
+
+    - name: publish pubkey
+      command: "docker exec web0{{ item }} bash -c 'echo {{ pubkey}} > /root/.ssh/authorized_keys'"      
+      with_items:
+        - "1"
+        - "2"
+
+    - name: correct permissions
+      command: "docker exec web0{{ item }} chmod -R go-rwx /root/.ssh"      
+      with_items:
+        - "1"
+        - "2"

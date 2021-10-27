@@ -1,0 +1,12 @@
+---
+- hosts: webserver
+  tasks:
+    - name: get application page
+      ansible.builtin.uri:
+        url: http://localhost/webapp/index.html
+        return_content: yes
+      register: page
+
+    - name: output page
+      debug:
+        msg: "{{ page.content }}"

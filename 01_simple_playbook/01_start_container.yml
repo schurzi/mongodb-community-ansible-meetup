@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Run management container
+      containers.podman.podman_container:
+        name: management
+        image: docker.io/rndmh3ro/docker-centos8-ansible
+        command: /lib/systemd/systemd
+        volume:
+          - /home/mch/ansible-mongo:/ansible
+          - /sys/fs/cgroup:/sys/fs/cgroup:ro
+        privileged: true
+        state: started
+    
+    - name: output connect string
+      debug:
+        msg: "connect by using 'docker exec -ti management bash'"
