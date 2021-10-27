@@ -1,6 +1,6 @@
 - hosts: localhost
   tasks:
-    - name: "Run Webserver container web0{{ item }}"
+    - name: Run Webserver container
       containers.podman.podman_container:
         name: "web0{{ item }}"
         image: docker.io/rndmh3ro/docker-centos8-ansible
